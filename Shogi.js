@@ -1,52 +1,33 @@
 Vue.component('fu', {
   template:
-
-  '<g @click="move()":transform = "trans"><polygon @click="move($event)"  :points="points" stroke = "black" fill = "wheat"></polygon><text x="50" y="50" font-size="35">歩</text></g>',
+  '<g @click="move()":transform="trans"><polygon  :points="points" stroke = "black" fill = "wheat"></polygon><text x="50" y="50" font-size="35">歩</text></g>',
   props: ["x","y","teban"],
-  computed:{
-    xpx:function(){
-      return parseInt(this.x)*100;
-    },
-    ypx:function(){
-      return parseInt(this.y)*100;
-    },
-      //相対座標で計算する
-    trans:function(){
-      return "translate(" +this.xpx+","+this.ypx+")";
-
-    },
+    computed:{
+	trans: function(){
+	    return "translate(" + parseInt(this.x)*100 + "," + parseInt(this.y)*100 + ")";
+	},
     points:function(){
-      if (this.teban==0){
-         return "5 0 10 70 50 100 90 70 95 0";
+	if (this.teban==0){
+          return "5 0 10 70 50 100 90 70 95 0";
       }
       else {
-
-         return "5 100 10 30 50 0 90 30 95 100";
+          return "5 100 10 30 50 0 90 30 95 100";
       }
     }
   },
 
   methods:{
-    move:function(){
-      //  alert("aiueo")
-       this.$emit("move")
-//       currentX = parseInt(event.offsetX/100);
-//      currentY  = parseInt(event.offsetY/100);
-//
-// //一つ上の部分
-//      currentX = currentX - 3;
-//      if(currentX > 0){
-//       // alert (currentX + " " +currentY);
-//       number = (currentY - 1)*3 + currentX -1;
-// alert(number);
-
-
-}
-    }
-
-
-
+      move:function(){
+	  console.log("move");
+	  this.$emit("move");
+      }
+  }
 })
+
+Vue.component('ban',{
+    template: '<g> </g>'
+})
+
 
 Vue.component('ou', {
   template:
@@ -167,6 +148,7 @@ Vue.component('gin', {
 
 })
 
+
 new Vue({
   el:"#app",
   data:{
@@ -176,7 +158,7 @@ new Vue({
   },
   methods:{
     move:function(){
-      alert("abc")
+	alert("abc")
     }
   }
 })
