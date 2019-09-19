@@ -1,66 +1,50 @@
 Vue.component('fu', {
   template:
-  //'<span><polygon @click="move()" :points="points" stroke = "black" fill = "wheat"></polygon><text @click="move()" x="100" y="0" >本日は晴天なり</text></div></span>',
-  // '<div><polygon @click="move()" :points="points" stroke = "black" fill = "wheat"></polygon><text @click="move()" x="100" y="0" >本日は晴天なり</text></div>',
-  //
-  //'<polygon @click="move()" :points="points" stroke = "black" fill = "wheat"></polygon>',
-  // <text :x="0" :y="30" :fill="blue">本日は晴天なり</text>',
-  '<g><polygon @click="move($event)"  :points="points" stroke = "black" fill = "wheat"></polygon><text x="50" y="50" font-size="35">歩</text></g>',
+
+  '<g @click="move()":transform = "trans"><polygon @click="move($event)"  :points="points" stroke = "black" fill = "wheat"></polygon><text x="50" y="50" font-size="35">歩</text></g>',
   props: ["x","y","teban"],
   computed:{
+    xpx:function(){
+      return parseInt(this.x)*100;
+    },
+    ypx:function(){
+      return parseInt(this.y)*100;
+    },
+      //相対座標で計算する
+    trans:function(){
+      return "translate(" +this.xpx+","+this.ypx+")";
+
+    },
     points:function(){
       if (this.teban==0){
-        pstr ="";
-        pstr +=(5+parseInt(this.x)*100+" ");
-        pstr +=(parseInt(this.y)*100+" ");
-        pstr +=(10+parseInt(this.x)*100+" ");
-        pstr +=(70+parseInt(this.y)*100+" ");
-        pstr +=(50+parseInt(this.x)*100+" ");
-        pstr +=(100+parseInt(this.y)*100+" ");
-        pstr +=(90+parseInt(this.x)*100+" ");
-        pstr +=(70+parseInt(this.y)*100+" ");
-        pstr +=(95+parseInt(this.x)*100+" ");
-        pstr +=(parseInt(this.y)*100+" ");
-        // return "5 0 10 70 50 100 90 70 95 0";
-        return pstr;
+         return "5 0 10 70 50 100 90 70 95 0";
       }
       else {
-        pstr ="";
-        pstr +=(5+parseInt(this.x)*100+" ");
-        pstr +=(100+parseInt(this.y)*100+" ");
-        pstr +=(10+parseInt(this.x)*100+" ");
-        pstr +=(30+parseInt(this.y)*100+" ");
-        pstr +=(50+parseInt(this.x)*100+" ");
-        pstr +=(parseInt(this.y)*100+" ");
-        pstr +=(90+parseInt(this.x)*100+" ");
-        pstr +=(30+parseInt(this.y)*100+" ");
-        pstr +=(95+parseInt(this.x)*100+" ");
-        pstr +=(100+parseInt(this.y)*100+" ");
-        // return "5 100 10 30 50 0 90 30 95 100";
-        return pstr;
+
+         return "5 100 10 30 50 0 90 30 95 100";
       }
     }
   },
 
   methods:{
-    move:function(event){
+    move:function(){
       //  alert("aiueo")
-      // this.$emit("move")
-      currentX = parseInt(event.offsetX/100);
-     currentY  = parseInt(event.offsetY/100);
-
-//一つ上の部分
-     currentX = currentX - 3;
-     if(currentX > 0){
-      // alert (currentX + " " +currentY);
-      number = (currentY - 1)*3 + currentX -1;
-alert(number);
+       this.$emit("move")
+//       currentX = parseInt(event.offsetX/100);
+//      currentY  = parseInt(event.offsetY/100);
+//
+// //一つ上の部分
+//      currentX = currentX - 3;
+//      if(currentX > 0){
+//       // alert (currentX + " " +currentY);
+//       number = (currentY - 1)*3 + currentX -1;
+// alert(number);
 
 
 }
     }
 
-  }
+
 
 })
 
@@ -191,7 +175,7 @@ new Vue({
     gin:[{x:0,y:0,teban:0},{x:4,y:4,teban:1}]
   },
   methods:{
-    move2:function(){
+    move:function(){
       alert("abc")
     }
   }
