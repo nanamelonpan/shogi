@@ -1,161 +1,141 @@
-Vue.component('fu', {
-    template:
-    '<g @mouseover="mover()" @mouseleave="mleave()" @click="move"'+
-	':transform="trans"><polygon  :points="points" stroke = "black" fill = "wheat"></polygon><text x="50" y="50" font-size="35">歩</text></g>',
+Vue.component('koma', {
+  template:
+  '<g  @click="chooseOrMove"'+
+  ':transform="trans"><polygon  :points="points" stroke = "black" fill = "wheat"></polygon><text x="50" y="50" font-size="35">{{kanji()}}</text></g>',
 
-    props: ["x","y","teban", "idx"],
+  props: ["x","y","teban", "idx","na"],
 
-    computed:{
-	trans: function(){
-	    return "translate(" + parseInt(this.x)*100 + "," + parseInt(this.y)*100 + ")";
-	},
-	points:function(){
-	    if (this.teban==0){
-		return "5 0 10 70 50 100 90 70 95 0";
-	    }
-	    else {
-		return "5 100 10 30 50 0 90 30 95 100";
-	    }
-	}
+  computed:{
+    trans: function(){
+      return "translate(" + parseInt(this.x)*100 + "," + parseInt(this.y)*100 + ")";
     },
-
-    methods:{
-	move:function(){
-	    this.$emit("moved", this.idx);
-	},
-	mover:function(){
-	    this.$emit("hover", this.idx);
-	},
-	mleave:function(){
-	    this.$emit("mleave", this.idx);
-	}
+    points:function(){
+      if (this.teban==0){
+        return "5 0 10 70 50 100 90 70 95 0";
+      }
+      else {
+        return "5 100 10 30 50 0 90 30 95 100";
+      }
     }
+  },
+
+  methods:{
+    chooseOrMove:function(){
+      this.$emit("action", this.idx);
+    },
+    kanji:function() {
+      if(this.na == "fu") {
+        return "歩";
+      }
+      else if (this.na == "gin") {
+        return "銀";
+
+      }else{
+        return "玉";
+      }
+
+    }
+  }
 })
+
 
 Vue.component('ban',{
-    template: '<g transform = "translate(100,100)" >'+
-	'<g v-for="(r,i) in masu"> <rect v-for="(c,j) in r" :x="100+100*j" :y="100+100*i" width="100" height="100" stroke="black" :fill="masu[j][i]==0? white:pink"></rect></g>'+
-	'<fu v-for="(f,idx) in fu" @moved="move()" @hover="relocate" @mleave="mleave" :teban="f.teban" :x="f.x" :y="f.y" :idx=idx></fu>' +
-	'<ou v-for="o in ou" :teban="o.teban" :x="o.x" :y="o.y"></ou>' +
-	'<gin v-for="g in gin" :teban="g.teban" :x="g.x" :y="g.y"></gin></g>',
-    data: function(){
-	return {
-	    fu:[{x:1,y:1,teban:0, nari:false},{x:3,y:3,teban:1,nari:false}],
-	    ou:[{x:2,y:1,teban:0},{x:2,y:3,teban:1}],
-	    gin:[{x:0,y:0,teban:0},{x:4,y:4,teban:1}],
-	    masu:[[0,0,0],[0,0,0],[0,0,0]],
-	    white:"white",
-	    pink:"pink",
-	};
-    },
-    methods:{
-	possiblePositionsFu: function(i){
-	    if (!this.fu[i].nari){
-		if (this.fu[i].teban==0){
-		    if (this.fu[i].y <= 1){
-			return [{x:this.fu[i].x, y:this.fu[i].y+1}];
-		    }
-		    else {
-			return [];
-		    }
-		}
-		else{
-		    if (this.fu[i].y >= 1){
-			return [{x:this.fu[i].x, y:this.fu[i].y-1}];
-		    }
-		    else {
-			return [];
-		    }
-		}
-	    }
-	    else{
-		return [];
-	    }
-	},
-	relocate: function(i){
-	    for (let p of this.possiblePositionsFu(i)){
-		console.log(p);
-		this.masu[p.x-1].splice(p.y-1,1,1);
-	    }
-	},
-	mleave: function(i){
-	    this.masu = [[0,0,0],[0,0,0],[0,0,0]];
-	},
-	move: function(){
-	    alert("abc");
-	}
-    }
-})
-
-
-Vue.component('ou', {
-  template:
-    '<g @click="move()":transform="trans"><polygon  :points="points" stroke = "black" fill = "wheat"></polygon><text x="50" y="50" font-size="35">玉</text></g>',
-  props: ["x","y","teban"],
-  computed:{
-    trans: function(){
-  	    return "translate(" + parseInt(this.x)*100 + "," + parseInt(this.y)*100 + ")";
-  	},
-    points:function(){
-      if (this.teban==0){
-         return "5 0 10 70 50 100 90 70 95 0";
-      }
-      else {
-         return "5 100 10 30 50 0 90 30 95 100";
-      }
-    }
+  template: '<g transform = "translate(100,100)" >'+
+  '<g v-for="(r,i) in masu"> <rect v-for="(c,j) in r" :x="100+100*j" :y="100+100*i" width="100" height="100" stroke="black" :fill="masu[j][i]==0? white:pink" @click="masuClick(i,j)"></rect></g>'+
+  '<koma v-for="(f,idx) in koma"  @action="act(0,idx)" :teban="f.teban" :x="f.x" :y="f.y" :idx="idx" :na ="f.na"></koma></g>',
+  data: function(){
+    return {
+      koma:[{na:"fu",x:1,y:1,teban:0, nari:false},{na:"fu",x:3,y:3,teban:1,nari:false},{na:"ou",x:2,y:1,teban:0},{na:"ou",x:2,y:3,teban:1},
+  {na:"gin",x:0,y:0,teban:0},{na:"gin",x:4,y:4,teban:1}],
+      masu:[[0,0,0],[0,0,0],[0,0,0]],
+      white:"white",
+      pink:"pink",
+      f:"fu",
+      o:"ou",
+      g:"gin",
+      teban:0,
+      stage:"choose",
+      chosen:null
+    };
   },
   methods:{
-    move:function(event){
-
-      currentX = parseInt(event.offsetX/100);
-     currentY  = parseInt(event.offsetY/100);
-      //alert (currentX + " " +currentY);
-      number = (currentY - 1)*3 + currentX -1;
-alert(number);
-    }
-    // searchBlock: function(event){
-    //
-    //    // alert (currentY);
-    // }
-
-  }
-
-})
-
-
-Vue.component('gin', {
-  template:
-  '<g @click="move()":transform="trans"><polygon  :points="points" stroke = "black" fill = "wheat"></polygon><text x="27" y="70" font-size="45">銀</text></g>',
-props: ["x","y","teban"],
-  computed:{
-    trans: function(){
-        return "translate(" + parseInt(this.x)*100 + "," + parseInt(this.y)*100 + ")";
+    possiblePositionsFu: function(i){
+      if (!this.koma[i].nari){
+        if (this.koma[i].teban==0){
+          if (this.koma[i].y <= 1){
+            return [{x:this.koma[i].x, y:this.koma[i].y+1}];
+          }
+          else {
+            return [];
+          }
+        }
+        else{
+          if (this.koma[i].y >= 1){
+            return [{x:this.koma[i].x, y:this.koma[i].y-1}];
+          }
+          else {
+            return [];
+          }
+        }
+      }
+      else{
+        return [];
+      }
     },
-    points:function(){
-      if (this.teban==0){
-         return "5 0 10 70 50 100 90 70 95 0";
+    //i
+    act: function(k,i){
+      if (this.stage == "choose") {
+        //自分のコマか
+
+        if (this.koma[i].teban == this.teban) {
+          //色の反転
+
+          for (let p of this.possiblePositionsFu(i)){
+            console.log(p);
+            this.masu[p.x-1].splice(p.y-1,1,1);
+          }
+         console.log(k);
+          this.stage ="move";
+          this.chosen = i
+
+        }
+
+      } else {
+       //move
+       //現在どの駒が選択されているか
+
+       if (this.masu) {
+
+       }
+
       }
-      else {
-         return "5 100 10 30 50 0 90 30 95 100";
+    },
+    masuClick:function (i,j) {
+//console.log("きた");
+      if (this.stage == "move") {
+    console.log("きた");
+
+        if (this.masu[j][i] == 1) {
+          console.log([i,j]);
+          //駒を動かす
+          this.move(this.chosen,i,j);
+
+
+        }
+
       }
+
+    },
+    mleave: function(i){
+      this.masu = [[0,0,0],[0,0,0],[0,0,0]];
+    },
+    move: function(idx,i,j){
+
+
+      //[{na:"fu",x:1,y:1,teban:0, nari:false}
+      this.koma.splice(idx,1,{na:this.koma[idx].na,teban:this.koma[idx].teban,nari:this.koma[idx].nari, x:j+1,y:i+1});
     }
-  },
-
-  methods:{
-    move:function(event){
-      //   alert("aiueo")
-      // this.$emit('move2')
-      currentX = parseInt(event.offsetX/100);
-     currentY  = parseInt(event.offsetY/100);
-        //alert (currentX + " " +currentY);
-
-        number = (currentY - 1)*3 + currentX -1;
-  alert(number);
-    }
-
   }
-
 })
 
 
@@ -168,7 +148,7 @@ new Vue({
   },
   methods:{
     move:function(){
-	alert("abc")
+      alert("abc")
     }
   }
 })
