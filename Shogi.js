@@ -66,16 +66,30 @@ Vue.component('ban',{
       if (!koma.nari){
         //盤に収まるかどうか
         //of　で一つ一つがuに入っていく
+        //持ち駒だった時　= 駒が置いていないところに置くことができる
+        if(koma.x<1|koma.x>3){
+          for(var i = 1; i<4;i++) {
+            for(var j=1;j<4;j++)
+            //現在地+動く方向　が盤面に収まっているか
+            if(this.occupied(i,j,0)&&this.occupied(i,j,1)){
+              positions.push({x:i,y:j});
+            }
+
+          }
+        }else{
         for(let u of this.ugoki[koma.na]) {
           //現在地+動く方向　が盤面に収まっているか
           if(this.isInside(koma.x+dir*u[0],koma.y+dir*u[1]) && this.occupied(koma.x+dir*u[0],koma.y+dir*u[1],koma.teban)){
             positions.push({x:koma.x+dir*u[0],y:koma.y+dir*u[1]});
           }
-
         }
+      }
+      console.log("-------");
+      console.log(positions);
         return positions;
 
-      }
+
+    }
     },
     isInside(x,y){
       if(x>=1 && x<=3 && y>=1 && y<=3){
@@ -85,6 +99,7 @@ Vue.component('ban',{
 
     },
     //自分の駒がないことを確認
+    //駒があったらfalse
     occupied(x,y,teban){
       for (let k of this.koma){
         if(k.x == x && k.y == y && k.teban == teban){
@@ -94,11 +109,11 @@ Vue.component('ban',{
       return true;
 
     },
-    //i
+    //動けるところに色をつける
     act: function(k,i){
       if (this.stage == "choose") {
         //自分のコマか
-
+console.log("aaa");
         if (this.koma[i].teban == this.teban) {
           //色の反転
           //からの時は
