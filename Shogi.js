@@ -1,8 +1,7 @@
 Vue.component('koma', {
   template:
   '<g  @click="chooseOrMove"'+
-  ':transform="trans"><polygon  :points="points" stroke = "black" fill = "wheat"></polygon><text x="50" y="50" font-size="35">{{kanji()}}</text></g>',
-
+  ':transform="trans"><polygon  :points="points" stroke = "black" fill = "wheat"></polygon><text x="27" y="70" font-size="45">{{kanji()}}</text></g>',
   props: ["x","y","teban", "idx","na"],
 
   computed:{
@@ -40,14 +39,15 @@ Vue.component('koma', {
 
 
 Vue.component('ban',{
-  template: '<g transform = "translate(100,100)" >'+
+  template: '<g transform = "translate(100,100)" >'+'<g transform = "translate(50,350)"><text>{{teban}}{{stage}}</text></g>'+
   '<g v-for="(r,i) in masu"> <rect v-for="(c,j) in r" :x="100+100*j" :y="100+100*i" width="100" height="100" stroke="black" :fill="masu[j][i]==0? white:pink" @click="masuClick(i,j)"></rect></g>'+
   '<koma v-for="(f,idx) in koma"  @action="act(0,idx)" :teban="f.teban" :x="f.x" :y="f.y" :idx="idx" :na ="f.na"></koma></g>',
   data: function(){
     return {
       koma:[{na:"fu",x:1,y:1,teban:0, nari:false},{na:"fu",x:3,y:3,teban:1,nari:false},{na:"ou",x:2,y:1,teban:0},{na:"ou",x:2,y:3,teban:1},
-  {na:"gin",x:0,y:0,teban:0},{na:"gin",x:4,y:4,teban:1}],
+      {na:"gin",x:0,y:0,teban:0},{na:"gin",x:4,y:4,teban:1}],
       masu:[[0,0,0],[0,0,0],[0,0,0]],
+      ugoki:{fu:[[0,1]],gin:[[0,1],[1,1],[-1,1],[1,-1],[-1,-1]],ou:[[-1,1],[0,1],[1,1],[-1,0],[1,0],[-1,-1],[0,-1],[1,-1]]},
       white:"white",
       pink:"pink",
       f:"fu",
@@ -60,27 +60,39 @@ Vue.component('ban',{
   },
   methods:{
     possiblePositionsFu: function(i){
-      if (!this.koma[i].nari){
-        if (this.koma[i].teban==0){
-          if (this.koma[i].y <= 1){
-            return [{x:this.koma[i].x, y:this.koma[i].y+1}];
+      let koma = this.koma[i];
+      let dir = (this.teban == 0?1:-1);
+      let positions =[];
+      if (!koma.nari){
+        //盤に収まるかどうか
+        //of　で一つ一つがuに入っていく
+        for(let u of this.ugoki[koma.na]) {
+          //現在地+動く方向　が盤面に収まっているか
+          if(this.isInside(koma.x+dir*u[0],koma.y+dir*u[1]) && this.occupied(koma.x+dir*u[0],koma.y+dir*u[1],koma.teban)){
+            positions.push({x:koma.x+dir*u[0],y:koma.y+dir*u[1]});
           }
-          else {
-            return [];
-          }
+
         }
-        else{
-          if (this.koma[i].y >= 1){
-            return [{x:this.koma[i].x, y:this.koma[i].y-1}];
-          }
-          else {
-            return [];
-          }
+        return positions;
+
+      }
+    },
+    isInside(x,y){
+      if(x>=1 && x<=3 && y>=1 && y<=3){
+        return true;
+      }
+      else return false;
+
+    },
+    //自分の駒がないことを確認
+    occupied(x,y,teban){
+      for (let k of this.koma){
+        if(k.x == x && k.y == y && k.teban == teban){
+          return false;
         }
       }
-      else{
-        return [];
-      }
+      return true;
+
     },
     //i
     act: function(k,i){
@@ -89,37 +101,43 @@ Vue.component('ban',{
 
         if (this.koma[i].teban == this.teban) {
           //色の反転
-
+          //からの時は
+          if(this.possiblePositionsFu(i).length == 0){
+            return;
+          }
           for (let p of this.possiblePositionsFu(i)){
             console.log(p);
             this.masu[p.x-1].splice(p.y-1,1,1);
           }
-         console.log(k);
+          console.log(k);
           this.stage ="move";
           this.chosen = i
 
         }
 
       } else {
-       //move
-       //現在どの駒が選択されているか
+        //move
+        //現在どの駒が選択されているか
 
-       if (this.masu) {
+        if (this.masu) {
 
-       }
+        }
 
       }
     },
     masuClick:function (i,j) {
-//console.log("きた");
+      //console.log("きた");
       if (this.stage == "move") {
-    console.log("きた");
+        console.log("きた");
 
         if (this.masu[j][i] == 1) {
           console.log([i,j]);
           //駒を動かす
           this.move(this.chosen,i,j);
-
+          this.stage ="choose";
+          //マス
+          this.masu = [[0,0,0],[0,0,0],[0,0,0]];
+          this.teban = 1 - this.teban;
 
         }
 
@@ -130,8 +148,6 @@ Vue.component('ban',{
       this.masu = [[0,0,0],[0,0,0],[0,0,0]];
     },
     move: function(idx,i,j){
-
-
       //[{na:"fu",x:1,y:1,teban:0, nari:false}
       this.koma.splice(idx,1,{na:this.koma[idx].na,teban:this.koma[idx].teban,nari:this.koma[idx].nari, x:j+1,y:i+1});
     }
