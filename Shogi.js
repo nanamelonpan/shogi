@@ -67,16 +67,35 @@ Vue.component('ban',{
       if (!koma.nari){
         //盤に収まるかどうか
         //of　で一つ一つがuに入っていく
+
         //持ち駒だった時　= 駒が置いていないところに置くことができる
-        if(koma.x<1|koma.x>3){
+        //駒が手持ちの時
+        //xではなくyで判定
+        if(koma.y<1|koma.y>3){
+          var line = 0;
+           if(koma.na=="fu"){
+          // //   //もし歩が置けない
+          // console.log("-------line");
+               line =  this.ableToPutFu(koma.x,koma.y,koma.teban);
+          //     console.log("-------line");
+          //     console.log(line);
+            }
           for(var i = 1; i<4;i++) {
-            for(var j=1;j<4;j++)
+            for(var j=1;j<4;j++){
+
             //現在地+動く方向　が盤面に収まっているか
-            if(this.occupied(i,j,0)&&this.occupied(i,j,1)){
+            //もしも駒が歩だったら
+            if(i === line){
+              i = i+1;
+                console.log("-------line222");
+                console.log(line);}
+
+            if(this.occupied(i,j,0)&&this.occupied(i,j,1)&&i<4){
               positions.push({x:i,y:j});
             }
 
           }
+        }
         }else{
           for(let u of this.ugoki[koma.na]) {
             //現在地+動く方向　が盤面に収まっているか
@@ -118,6 +137,14 @@ Vue.component('ban',{
         }
       }
       return null;
+    },
+    //そこに歩が打てるかどうか　(これ以上進めるか＆に歩ではないか)
+    ableToPutFu(x,y,teban){
+      for(var i = 1; i<4; i++){
+        //
+        if(!this.occupied(i,y,teban)){return i;}
+      }
+
     },
     //動けるところに色をつける
     act: function(k,i){
@@ -184,6 +211,8 @@ Vue.component('ban',{
       //[{na:"fu",x:1,y:1,teban:0, nari:false}
       this.koma.splice(idx,1,{na:this.koma[idx].na,teban:this.koma[idx].teban,nari:this.koma[idx].nari, x:j+1,y:i+1});
 
+      //相手の駒がそこにあるかを確認する
+      //あった場合それが玉であれば勝敗が決定し、
       let k  = this.find(i+1,j+1);
       console.log(k);
       //
@@ -198,8 +227,12 @@ Vue.component('ban',{
           x = 4-(this.temochi[0]);
           this.temochi[0]++;
         }
+      this.koma.splice(k,1,{na:this.koma[k].na,teban:(1-this.koma[k].teban),nari:false,x:x,y:this.koma[k].teban==1?0:4});
+      if(this.koma[k].na=="ou"){
+        //とった駒が王様か判定
 
-        this.koma.splice(k,1,{na:this.koma[k].na,teban:(1-this.koma[k].teban),nari:false,x:x,y:this.koma[k].teban==1?0:4});
+      }
+      //もしもとった駒が王様だったら
 
       }
     }
