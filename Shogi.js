@@ -73,24 +73,29 @@ Vue.component('ban',{
         //xではなくyで判定
         if(koma.y<1|koma.y>3){
           var line = 0;
+          var line2 = 0;
+          //持ち駒でかつその駒が歩だった時
            if(koma.na=="fu"){
-          // //   //もし歩が置けない
-          // console.log("-------line");
+              //2歩になってしまうかもしれない場合、そこの列には置けないようにする
                line =  this.ableToPutFu(koma.x,koma.y,koma.teban);
-          //     console.log("-------line");
-          //     console.log(line);
+               console.log("line");
+               console.log(line);
+               //これ以上進めないところに置けないようにする
+               line2 = koma.teban*(-2) + 3;
+               //line2 = koma.teban*(2) + 1;
+
             }
+            //iが横 jが縦
           for(var i = 1; i<4;i++) {
             for(var j=1;j<4;j++){
 
             //現在地+動く方向　が盤面に収まっているか
             //もしも駒が歩だったら
-            if(i === line){
-              i = i+1;
-                console.log("-------line222");
-                console.log(line);}
+            //if(i == line){i = i+1;}
+            if(i ==  line ){i = i+1;}
+            if(j == line2){j = j+1;}
 
-            if(this.occupied(i,j,0)&&this.occupied(i,j,1)&&i<4){
+            if(this.occupied(i,j,0)&&this.occupied(i,j,1)&&i<4&&j<4){
               positions.push({x:i,y:j});
             }
 
@@ -140,12 +145,28 @@ Vue.component('ban',{
     },
     //そこに歩が打てるかどうか　(これ以上進めるか＆に歩ではないか)
     ableToPutFu(x,y,teban){
-      for(var i = 1; i<4; i++){
+      // for(var i = 1; i<4; i++){
         //
-        if(!this.occupied(i,y,teban)){return i;}
-      }
+        //if(!this.occupied(i,y,teban)){return i;}
+        //ここの部分がうまくいってない
+        //xが列かもしれない
+        for (let k of this.koma){
+            for(var i = 1; i<4; i++){
+          //if(k.x == x && k.y == y && k.teban == teban && k.na == "fu"){
+          //最後の条件のところで持ち駒を換算しなくなる
+              if(k.y == i && k.teban == teban && k.na == "fu" && k.x < 4 && k.x>0){
+                console.log("???");
+                console.log(i);
+
+            return i;
+          }
+        }
+        }
+        return 4;
+      //}
 
     },
+
     //動けるところに色をつける
     act: function(k,i){
       if (this.stage == "choose") {
